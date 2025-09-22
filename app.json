@@ -1,29 +1,44 @@
 {
   "expo": {
-    "name": "footballapp",
-    "slug": "footballapp",
+    "name": "footvida",
+    "slug": "footvida",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "icon": "./assets/logoa.png",
+    "scheme": "myapp",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/logoa.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#6A0DAD",
+      "userInterfaceStyle": "dark"
     },
     "ios": {
-      "supportsTablet": true
+      "splash": {
+        "image": "./assets/logoa.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#6A0DAD",
+        "userInterfaceStyle": "dark"
+      }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+      "splash": {
+        "image": "./assets/logoa.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#6A0DAD"
       },
-      "edgeToEdgeEnabled": true
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logoa.png",
+        "backgroundColor": "#6A0DAD"
+      }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "plugins": [
+      "expo-secure-store",
+      "expo-web-browser"
+    ]
   }
 }
