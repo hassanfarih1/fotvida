@@ -13,9 +13,9 @@ import {
   FlatList,
   Animated,
   RefreshControl,
-  PixelRatio,
   Platform,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Circle } from "react-native-svg";
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useUser } from "@clerk/clerk-expo";
@@ -215,24 +215,25 @@ export default function MatchDetailScreen({ route }) {
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <View style={styles.container}>
-      {/* Home Icon */}
-      <TouchableOpacity
-        style={styles.homeIcon}
-        onPress={() => navigation.navigate("Home")}
-      >
-        <Ionicons name="arrow-undo-outline" size={scale(24)} color="#FFD700" />
-      </TouchableOpacity>
-
+    <LinearGradient colors={["#4B0082", "#5E2A84"]} style={styles.container}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: verticalScale(140) }}
+        contentContainerStyle={{ paddingBottom: verticalScale(40) }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <Image
-          source={require("../assets/fot1.jpg")}
-          style={[styles.matchImage, { width: SCREEN_WIDTH, height: verticalScale(200) }]}
-          resizeMode="cover"
-        />
+        <View style={{ position: "relative" }}>
+          <Image
+            source={require("../assets/fot1.jpg")}
+            style={[styles.matchImage, { width: SCREEN_WIDTH, height: verticalScale(200) }]}
+            resizeMode="cover"
+          />
+          {/* Go Back button on top of image */}
+          <TouchableOpacity
+            style={styles.homeIcon}
+            onPress={() => navigation.navigate("Home")}
+          >
+            <Ionicons name="arrow-undo-outline" size={scale(24)} color="#FFD700" />
+          </TouchableOpacity>
+        </View>
 
         {/* Creator */}
         <View style={styles.creatorRow}>
@@ -358,79 +359,89 @@ export default function MatchDetailScreen({ route }) {
             )}
           </View>
         )}
-      </ScrollView>
 
-      {/* Join/Leave/Delete button */}
-      <TouchableOpacity
-        style={[
-          styles.joinButton,
-          {
-            backgroundColor: isCreator ? "red" : isJoined ? "red" : "#FFD700",
-            opacity: loading ? 0.5 : 1,
-            paddingVertical: Platform.OS === "android" ? verticalScale(8) : verticalScale(20),
-          },
-        ]}
-        onPress={isCreator ? handleDeleteMatch : isJoined ? handleLeaveMatch : handleJoinMatch}
-        disabled={loading}
-      >
-        <Text
-          style={[
-            styles.joinButtonText,
-            {
-              color: isCreator || isJoined ? "white" : "#4B0082",
-              fontSize: Platform.OS === "android" ? moderateScale(19) : moderateScale(18),
-            },
-          ]}
-        >
-          {loading
-            ? "Chargement..."
-            : isCreator
-            ? "Supprimer le match"
-            : isJoined
-            ? "Quitter le match"
-            : "Rejoindre le match"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+        {/* Join / Leave / Delete Button */}
+        <View style={{ alignItems: "center", marginTop: verticalScale(30) }}>
+          <TouchableOpacity
+            style={[
+              styles.joinButton,
+              {
+                backgroundColor: isCreator ? "red" : isJoined ? "red" : "#FFD700",
+                opacity: loading ? 0.5 : 1,
+              },
+            ]}
+            onPress={isCreator ? handleDeleteMatch : isJoined ? handleLeaveMatch : handleJoinMatch}
+            disabled={loading}
+          >
+            <Text
+              style={[
+                styles.joinButtonText,
+                { color: isCreator || isJoined ? "white" : "#4B0082" },
+              ]}
+            >
+              {loading
+                ? "Chargement..."
+                : isCreator
+                ? "Supprimer le match"
+                : isJoined
+                ? "Quitter le match"
+                : "Rejoindre le match"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#4B0082" },
+  container: { flex: 1 },
   matchImage: { borderRadius: 0, marginBottom: verticalScale(15) },
 
   homeIcon: {
     position: "absolute",
-    top: Platform.OS === "android" ? 40 : 60,
-    left: 20,
+    top: Platform.OS === "android" ? 15 : 50,
+    left: 15,
     zIndex: 1000,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    padding: 6,
+    borderRadius: 20,
   },
 
   creatorRow: { flexDirection: "row", alignItems: "center", marginBottom: verticalScale(8), paddingHorizontal: scale(20) },
   creatorImage: { width: scale(50), height: scale(50), borderRadius: scale(25) },
-  matchNameSmall: { color: "#FFD700", fontSize: moderateScale(Platform.OS === "android" ? 20 : 20), fontWeight: "bold" },
-  creatorName: { color: "#ccc", fontSize: moderateScale(Platform.OS === "android" ? 15 : 16) },
+  matchNameSmall: { color: "#FFD700", fontSize: moderateScale(20), fontWeight: "bold" },
+  creatorName: { color: "#ccc", fontSize: moderateScale(16) },
 
   thinSeparator: { borderBottomColor: "rgba(255, 255, 255, 0.3)", borderBottomWidth: 0.3, opacity: 0.5, marginHorizontal: scale(20), marginBottom: verticalScale(15) },
 
   progressRow: { flexDirection: "row", alignItems: "center", marginBottom: verticalScale(20), marginTop: verticalScale(10), paddingHorizontal: scale(20) },
   circularProgressWrapper: { width: scale(90), height: scale(90), justifyContent: "center", alignItems: "center" },
-  circularText: { position: "absolute", color: "white", fontWeight: "bold", textAlign: "center", fontSize: moderateScale(Platform.OS === "android" ? 12 : 14) },
+  circularText: { position: "absolute", color: "white", fontWeight: "bold", textAlign: "center", fontSize: moderateScale(14) },
 
   infoRight: { marginLeft: scale(20), justifyContent: "center" },
-  priceText: { color: "white", fontSize: moderateScale(Platform.OS === "android" ? 14 : 18), fontWeight: "bold", marginBottom: verticalScale(5) },
-  timeText: { color: "#FFD700", fontSize: moderateScale(Platform.OS === "android" ? 14 : 16), fontWeight: "600", marginBottom: verticalScale(5) },
-  whatsLink: { fontSize: moderateScale(Platform.OS === "android" ? 14 : 16), fontWeight: "bold", marginBottom: verticalScale(5), color: "green" },
-  locationLink: { fontSize: moderateScale(Platform.OS === "android" ? 14 : 16), fontWeight: "bold", color: "grey" },
+  priceText: { color: "white", fontSize: moderateScale(18), fontWeight: "bold", marginBottom: verticalScale(5) },
+  timeText: { color: "#FFD700", fontSize: moderateScale(16), fontWeight: "600", marginBottom: verticalScale(5) },
+  whatsLink: { fontSize: moderateScale(16), fontWeight: "bold", marginBottom: verticalScale(5), color: "green" },
+  locationLink: { fontSize: moderateScale(16), fontWeight: "bold", color: "grey" },
 
-  detailLabel: { color: "#FFD700", fontSize: moderateScale(Platform.OS === "android" ? 14 : 16), fontWeight: "600", marginBottom: verticalScale(5) },
-  detailsText: { color: "white", fontSize: moderateScale(Platform.OS === "android" ? 14 : 16) },
+  detailLabel: { color: "#FFD700", fontSize: moderateScale(16), fontWeight: "600", marginBottom: verticalScale(5) },
+  detailsText: { color: "white", fontSize: moderateScale(16) },
 
   playerCard: { alignItems: "center", marginRight: scale(15), width: scale(70) },
   playerImage: { width: scale(50), height: scale(50), borderRadius: scale(25), marginBottom: verticalScale(3) },
-  playerName: { color: "white", fontSize: moderateScale(Platform.OS === "android" ? 11 : 12), textAlign: "center" },
-  playerPhone: { color: "#FFD700", fontSize: moderateScale(Platform.OS === "android" ? 9 : 10), textAlign: "center" },
+  playerName: { color: "white", fontSize: moderateScale(12), textAlign: "center" },
+  playerPhone: { color: "#FFD700", fontSize: moderateScale(10), textAlign: "center" },
 
-  joinButton: { position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 999 },
-  joinButtonText: { fontWeight: "bold", textAlign: "center" },
+  joinButton: {
+    width: "80%",
+    paddingVertical: verticalScale(12),
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  joinButtonText: { fontWeight: "bold", fontSize: moderateScale(18) },
 });

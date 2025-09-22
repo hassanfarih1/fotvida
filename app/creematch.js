@@ -11,13 +11,13 @@ import {
   ActivityIndicator,
   Platform,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { useUser } from "@clerk/clerk-expo";
 
 export default function CreerMatch({ navigation }) {
-  const { user } = useUser(); 
+  const { user } = useUser();
   const userEmail = user?.primaryEmailAddress?.emailAddress || null;
 
   const [nom, setNom] = useState("");
@@ -26,15 +26,14 @@ export default function CreerMatch({ navigation }) {
   const [localisation, setLocalisation] = useState("");
   const [locationCoords, setLocationCoords] = useState(null);
   const [showMap, setShowMap] = useState(false);
-  const [places, setPlaces] = useState(null); 
+  const [places, setPlaces] = useState(null);
   const [prix, setPrix] = useState("");
   const [date, setDate] = useState("");
   const [heureDebut, setHeureDebut] = useState("");
   const [heureFin, setHeureFin] = useState("");
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
 
-  // Request location permission and get user location
   const getUserLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -49,8 +48,6 @@ export default function CreerMatch({ navigation }) {
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
       });
-
-      // set initial marker at user location
       if (!locationCoords) {
         setLocationCoords({
           latitude: location.coords.latitude,
@@ -62,7 +59,6 @@ export default function CreerMatch({ navigation }) {
     }
   };
 
-  // Open map modal
   const openMap = async () => {
     await getUserLocation();
     setShowMap(true);
@@ -109,18 +105,7 @@ export default function CreerMatch({ navigation }) {
       Alert.alert("Erreur", "Vous devez être connecté pour créer un match.");
       return;
     }
-
-    if (
-      !nom ||
-      !description ||
-      !communicationLink ||
-      !localisation ||
-      !places ||
-      !prix ||
-      !date ||
-      !heureDebut ||
-      !heureFin
-    ) {
+    if (!nom || !description || !communicationLink || !localisation || !places || !prix || !date || !heureDebut || !heureFin) {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
@@ -142,10 +127,7 @@ export default function CreerMatch({ navigation }) {
     const hhFin = parseInt(hhFinStr);
     const mmFin = parseInt(mmFinStr);
 
-    if (
-      hhDebut > 23 || hhDebut < 0 || mmDebut > 59 || mmDebut < 0 ||
-      hhFin > 23 || hhFin < 0 || mmFin > 59 || mmFin < 0
-    ) {
+    if (hhDebut > 23 || hhDebut < 0 || mmDebut > 59 || mmDebut < 0 || hhFin > 23 || hhFin < 0 || mmFin > 59 || mmFin < 0) {
       Alert.alert("Erreur", "L'heure doit être valide (HH: 0-23, MM: 0-59).");
       return;
     }
@@ -197,8 +179,13 @@ export default function CreerMatch({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: "#4B0082" }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
+        {/* Back/Home Icon */}
+        <TouchableOpacity style={styles.backIcon} onPress={() => navigation.navigate("Home")}>
+          <Ionicons name="arrow-undo-outline" size={24} color="yellow" />
+        </TouchableOpacity>
+
         <Text style={styles.title}>Créer un match</Text>
 
         {/* Nom du match */}
@@ -220,12 +207,7 @@ export default function CreerMatch({ navigation }) {
         <View style={styles.field}>
           <Text style={styles.label}>Description</Text>
           <View style={[styles.card, { alignItems: "flex-start" }]}>
-            <Ionicons
-              name="document-text"
-              size={22}
-              color="#FFD700"
-              style={{ marginRight: 12, marginTop: 6 }}
-            />
+            <Ionicons name="document-text" size={22} color="#FFD700" style={{ marginRight: 12, marginTop: 6 }} />
             <TextInput
               style={[styles.input, { height: 80, textAlignVertical: "top", paddingTop: 6 }]}
               placeholder="Ex: Match amical pour s'amuser"
@@ -380,14 +362,6 @@ export default function CreerMatch({ navigation }) {
             <Text style={styles.submitText}>Confirmer</Text>
           )}
         </TouchableOpacity>
-
-        {/* Go Back Home Button */}
-        <TouchableOpacity
-          style={[styles.submitButton, { backgroundColor: "#FF4C4C" }]}
-          onPress={() => navigation.navigate("Home")}
-        >
-          <Text style={styles.submitText}>Retour à l'accueil</Text>
-        </TouchableOpacity>
       </ScrollView>
 
       {/* Map Modal */}
@@ -440,9 +414,18 @@ export default function CreerMatch({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#4B0082" },
+  container: { flex: 1 },
   scroll: { padding: 25, paddingBottom: 50 },
-  title: { fontSize: 30, fontWeight: "bold", color: "white", textAlign: "center", marginTop: 45, marginBottom: 15 },
+  title: { fontSize: 30, fontWeight: "bold", color: "white", textAlign: "center", marginTop: 20, marginBottom: 15 },
+  backIcon: {
+    position: "absolute",
+    top: 45,
+    left: 20,
+    zIndex: 10,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    padding: 6,
+    borderRadius: 20,
+  },
   field: { marginBottom: 9 },
   label: { color: "white", fontSize: 16, fontWeight: "600", marginTop: 15, marginBottom: 8, marginLeft: 5 },
   card: { flexDirection: "row", alignItems: "center", backgroundColor: "#5E2A84", borderRadius: 15, paddingHorizontal: 15, paddingVertical: 15, shadowColor: "#000", shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 },

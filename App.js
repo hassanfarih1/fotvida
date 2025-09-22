@@ -6,6 +6,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { ClerkProvider, useAuth, useUser } from "@clerk/clerk-expo";
 import * as SecureStore from "expo-secure-store";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 
 import OpenScreen from "./app/openscreen";
 import LoginScreen from "./app/loginscreen";
@@ -71,16 +72,19 @@ function RootNavigator() {
 
   // Loading splash screen
   if (!isLoaded || loading) {
-    return (
-      <SafeAreaView style={styles.splashContainer} edges={["bottom"]}>
-        <Image
-          source={require("./assets/logoa.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </SafeAreaView>
-    );
-  }
+  return (
+    <LinearGradient
+      colors={["#4B0082", "#5E2A84"]}
+      style={styles.splashContainer}
+    >
+      <Image
+        source={require("./assets/logoa.png")}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+    </LinearGradient>
+  );
+}
 
   return (
     <Stack.Navigator
@@ -134,11 +138,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   splashContainer: {
-    flex: 1,
-    backgroundColor: "#4B0082",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+},
   logo: {
     width: 250,
     height: 250,
