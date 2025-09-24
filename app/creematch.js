@@ -33,6 +33,7 @@ export default function CreerMatch({ navigation }) {
   const [heureFin, setHeureFin] = useState("");
   const [loading, setLoading] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
+  const api_key = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   const getUserLocation = async () => {
     try {
@@ -145,7 +146,7 @@ export default function CreerMatch({ navigation }) {
 
     setLoading(true);
     try {
-      const res = await fetch("https://theao.vercel.app/api/savematch", {
+      const res = await fetch(`${api_key}/api/savematch`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -198,6 +199,7 @@ export default function CreerMatch({ navigation }) {
               placeholder="Ex: Match du soir"
               placeholderTextColor="#bbb"
               value={nom}
+              maxLength={25}
               onChangeText={setNom}
             />
           </View>

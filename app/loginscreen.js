@@ -56,37 +56,47 @@ export default function SignUpScreen({ navigation }) {
 
   const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
-  const handleEmailSubmit = async () => {
-    dismissKeyboard();
-    if (!signUpLoaded || !signInLoaded) return;
+const handleEmailSubmit = async () => {
+  dismissKeyboard();
+  if (!signUpLoaded || !signInLoaded) return;
 
-    setLoading(true);
-    try {
-      await signUp.create({ emailAddress: email });
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-      setIsSignUpFlow(true);
-      setVerifying(true);
-      setResendTimer(120);
-    } catch (err) {
-      if (err.errors?.[0]?.code === "form_identifier_exists") {
-        try {
-          await signIn.create({ identifier: email });
-          await signIn.prepareFirstFactor({ strategy: "email_code" });
-          setIsSignUpFlow(false);
-          setVerifying(true);
-          setResendTimer(120);
-        } catch (signInErr) {
-          console.error("Sign in error:", signInErr);
-          Alert.alert("Erreur", "Impossible de se connecter.");
-        }
-      } else {
-        console.error("Sign up error:", err);
+  setLoading(true);
+
+  try {
+    // Attempt sign-in first
+    await signIn.create({ identifier: email });
+    await signIn.prepareFirstFactor({ strategy: "email_code" });
+    setIsSignUpFlow(false);
+    setVerifying(true);
+    setResendTimer(120);
+  } catch (signInErr) {
+    // If sign-in failed because user does not exist, create account
+    if (
+      signInErr.errors?.[0]?.code === "not_found" || 
+      signInErr.message?.includes("Couldn't find your account")
+    ) {
+      try {
+        await signUp.create({ emailAddress: email });
+        await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+        setIsSignUpFlow(true);
+        setVerifying(true);
+        setResendTimer(120);
+      } catch (signUpErr) {
+        console.error("Sign up error:", signUpErr);
         Alert.alert("Erreur", "Impossible de créer le compte.");
       }
-    } finally {
-      setLoading(false);
+    } else {
+      // Other sign-in errors
+      console.error("Sign in error:", signInErr);
+      Alert.alert("Erreur", "Impossible de se connecter.");
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   const handleChange = (text, index) => {
     if (/^\d$/.test(text)) {
@@ -116,40 +126,59 @@ export default function SignUpScreen({ navigation }) {
   }, [verifying]);
 
   const verifyOtp = async () => {
-    dismissKeyboard();
-    const otp = code.join("");
-    if (otp.length !== code.length) {
-      Alert.alert("Erreur", `Veuillez entrer les ${code.length} chiffres`);
-      return;
-    }
-    setVerifyingOtp(true);
-    try {
-      if (isSignUpFlow) {
-        const signupAttempt = await signUp.attemptEmailAddressVerification({ code: otp });
-        if (signupAttempt.status === "complete") {
-          await setActive({ session: signupAttempt.createdSessionId });
-          navigation.replace("Verification");
-          return;
-        }
+  dismissKeyboard();
+  const otp = code.join("");
+  if (otp.length !== code.length) {
+    Alert.alert("Erreur", `Veuillez entrer les ${code.length} chiffres`);
+    return;
+  }
+  setVerifyingOtp(true);
+
+  try {
+    let sessionIdFromAttempt;
+
+    if (isSignUpFlow) {
+      const signupAttempt = await signUp.attemptEmailAddressVerification({ code: otp });
+      if (signupAttempt.status === "complete") {
+        sessionIdFromAttempt = signupAttempt.createdSessionId;
       } else {
-        const signinAttempt = await signIn.attemptFirstFactor({
-          strategy: "email_code",
-          code: otp,
-        });
-        if (signinAttempt.status === "complete") {
-          await setActive({ session: signinAttempt.createdSessionId });
-          navigation.replace("Verification");
-          return;
-        }
+        Alert.alert("Erreur", "Vérification incomplète.");
+        return;
       }
-      Alert.alert("Erreur", "Vérification incomplète.");
-    } catch (err) {
-      console.error("OTP verification error:", err);
-      Alert.alert("Erreur", "Code invalide.");
-    } finally {
-      setVerifyingOtp(false);
+    } else {
+      const signinAttempt = await signIn.attemptFirstFactor({ strategy: "email_code", code: otp });
+      if (signinAttempt.status === "complete") {
+        sessionIdFromAttempt = signinAttempt.createdSessionId;
+      } else {
+        Alert.alert("Erreur", "Vérification incomplète.");
+        return;
+      }
     }
-  };
+
+    // Activate session
+    await setActive({ session: sessionIdFromAttempt });
+
+    // Fetch user email after session is active
+    const userResponse = await fetch(
+      `https://theao.vercel.app/api/checkonboarding?email=${encodeURIComponent(email)}`
+    );
+    const data = await userResponse.json();
+
+    const hasOnboarded =
+      data?.hasonboarded === true ||
+      data?.hasonboarded === "true" ||
+      data?.hasonboarded === "TRUE";
+
+    // Navigate depending on onboarding
+    navigation.replace(hasOnboarded ? "Home" : "Verification");
+  } catch (err) {
+    console.error("OTP verification error:", err);
+    Alert.alert("Erreur", "Code invalide.");
+  } finally {
+    setVerifyingOtp(false);
+  }
+};
+
 
   const resendCode = async () => {
     if (resendTimer > 0) return;

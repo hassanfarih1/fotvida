@@ -32,43 +32,41 @@ function RootNavigator() {
   const { user } = useUser();
   const [initialRoute, setInitialRoute] = useState(null);
   const [loading, setLoading] = useState(true);
+  const api_key = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
-    const checkOnboarding = async () => {
-      if (isLoaded && sessionId && user?.primaryEmailAddress?.emailAddress) {
-        try {
-          const email = user.primaryEmailAddress.emailAddress;
-          const res = await fetch(
-            `https://theao.vercel.app/api/checkonboarding?email=${encodeURIComponent(
-              email
-            )}`
-          );
-          const data = await res.json();
+  const checkOnboarding = async () => {
+    if (!isLoaded) return;
 
-          if (data.success) {
-            const hasOnboarded =
-              data.hasonboarded === true ||
-              data.hasonboarded === "true" ||
-              data.hasonboarded === "TRUE";
+    try {
+      if (sessionId && user?.primaryEmailAddress?.emailAddress) {
+        const email = user.primaryEmailAddress.emailAddress;
+        const res = await fetch(
+          `${api_key}/api/checkonboarding?email=${encodeURIComponent(email)}`
+        );
+        const data = await res.json();
+        console.log(data)
 
-            setInitialRoute(hasOnboarded ? "Home" : "Verification");
-          } else {
-            setInitialRoute("Verification");
-          }
-        } catch (err) {
-          console.error(err);
-          setInitialRoute("Verification");
-        } finally {
-          setLoading(false);
-        }
-      } else if (isLoaded && !sessionId) {
+        const hasOnboarded =
+          data?.hasonboarded === true ||
+          data?.hasonboarded === "true" ||
+          data?.hasonboarded === "TRUE";
+
+        setInitialRoute(hasOnboarded ? "Home" : "Verification");
+      } else {
+        // No session, go to Open screen
         setInitialRoute("Open");
-        setLoading(false);
       }
-    };
+    } catch (err) {
+      console.error("Onboarding check error:", err);
+      setInitialRoute("Verification"); // fallback
+    } finally {
+      setLoading(false); // ✅ always stop loading
+    }
+  };
 
-    checkOnboarding();
-  }, [isLoaded, sessionId, user?.primaryEmailAddress?.emailAddress]);
+  checkOnboarding();
+}, [isLoaded, sessionId, user?.primaryEmailAddress?.emailAddress]);
 
   // Loading splash screen
   if (!isLoaded || loading) {

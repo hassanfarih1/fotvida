@@ -37,6 +37,19 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [searchText, setSearchText] = useState("");
+  const api_key = process.env.EXPO_PUBLIC_API_BASE_URL;
+  const getMatchImage = (places) => {
+        switch (places) {
+          case 8:
+            return require("../assets/4v4.png");
+          case 10:
+            return require("../assets/5v5.png");
+          case 12:
+            return require("../assets/6v6.png");
+          default:
+            return require("../assets/fot1.jpg"); // fallback/default image
+        }
+      };
 
   useLayoutEffect(() => {
     navigation.setOptions({ headerShown: false, gestureEnabled: false });
@@ -78,7 +91,7 @@ export default function HomeScreen() {
 
   const fetchMatches = async () => {
     try {
-      const res = await fetch("https://theao.vercel.app/api/getmatch");
+      const res = await fetch(`${api_key}/api/getmatch`);
       const data = await res.json();
       setMatches(data.matches || []);
     } catch (err) {
@@ -187,6 +200,8 @@ export default function HomeScreen() {
           match.longitude
         );
       }
+      
+
 
       const joinedPlayersCount = match.joueur_de_match?.length || 0;
       const remainingPlaces = match.places - joinedPlayersCount;
@@ -350,10 +365,11 @@ export default function HomeScreen() {
               <View key={idx} style={styles.card}>
                 <View style={styles.imageBackgroundWrapper}>
                   <ImageBackground
-                    source={require("../assets/fot1.jpg")}
+                    source={getMatchImage(match.places)}
                     style={styles.backgroundImage}
                     imageStyle={{ borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
                   />
+
                   <Image
                     source={
                       match.creator_picture

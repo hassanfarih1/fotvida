@@ -38,6 +38,8 @@ export default function OnboardingScreen() {
   const slideAnim = useRef(new Animated.Value(50)).current;
   const lottieRef = useRef(null);
 
+  const api_key = process.env.EXPO_PUBLIC_API_BASE_URL;
+
   // Disable Android hardware back button
   useEffect(() => {
     const backAction = () => true;
@@ -74,7 +76,7 @@ export default function OnboardingScreen() {
     setLoading(true);
 
     try {
-      const response = await fetch("https://theao.vercel.app/api/saveprofile", {
+      const response = await fetch(`${api_key}/api/saveprofile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, firstName, lastName, phone, birthDate, gender }),

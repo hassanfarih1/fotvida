@@ -35,6 +35,7 @@ export default function ProfileScreen() {
   const [gender, setGender] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const api_key = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   useLayoutEffect(() => {
     navigation.setOptions({ headerShown: false, gestureEnabled: false });
@@ -54,7 +55,7 @@ export default function ProfileScreen() {
       if (!email) return;
       setFetching(true);
       try {
-        const res = await fetch("https://theao.vercel.app/api/getprofile", {
+        const res = await fetch(`${api_key}/api/getprofile`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -157,7 +158,7 @@ export default function ProfileScreen() {
         });
       }
 
-      const res = await fetch("https://theao.vercel.app/api/saveprofile", {
+      const res = await fetch(`${api_key}/api/saveprofile`, {
         method: "POST",
         body: formData,
         headers: {

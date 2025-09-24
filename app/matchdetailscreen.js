@@ -41,6 +41,19 @@ export default function MatchDetailScreen({ route }) {
   const [players, setPlayers] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
+  const api_key = process.env.EXPO_PUBLIC_API_BASE_URL;
+  const getMatchImage = (places) => {
+        switch (places) {
+          case 8:
+            return require("../assets/4v4.png");
+          case 10:
+            return require("../assets/5v5.png");
+          case 12:
+            return require("../assets/6v6.png");
+          default:
+            return require("../assets/fot1.jpg"); // fallback/default image
+        }
+      };
 
   const DESCRIPTION_LIMIT = 300;
 
@@ -83,7 +96,7 @@ export default function MatchDetailScreen({ route }) {
     if (!userEmail) return;
     setLoading(true);
     try {
-      const res = await fetch("https://theao.vercel.app/api/getmatchjoin", {
+      const res = await fetch(`${api_key}/api/getmatchjoin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: userEmail, matchId: match.id }),
@@ -112,7 +125,7 @@ export default function MatchDetailScreen({ route }) {
   const handleJoinMatch = async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://theao.vercel.app/api/matchjoin", {
+      const res = await fetch(`${api_key}/api/matchjoin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: userEmail, matchId: match.id }),
@@ -135,7 +148,7 @@ export default function MatchDetailScreen({ route }) {
   const handleLeaveMatch = async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://theao.vercel.app/api/matchleave", {
+      const res = await fetch(`${api_key}/api/matchleave`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: userEmail, matchId: match.id }),
@@ -167,7 +180,7 @@ export default function MatchDetailScreen({ route }) {
           onPress: async () => {
             setLoading(true);
             try {
-              const res = await fetch("https://theao.vercel.app/api/deletematch", {
+              const res = await fetch(`${api_key}/api/deletematch`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userEmail, matchId: match.id }),
@@ -222,7 +235,7 @@ export default function MatchDetailScreen({ route }) {
       >
         <View style={{ position: "relative" }}>
           <Image
-            source={require("../assets/fot1.jpg")}
+            source={getMatchImage(match.places)}
             style={[styles.matchImage, { width: SCREEN_WIDTH, height: verticalScale(200) }]}
             resizeMode="cover"
           />
