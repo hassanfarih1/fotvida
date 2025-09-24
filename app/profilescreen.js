@@ -18,6 +18,8 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "@clerk/clerk-expo";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -146,7 +148,6 @@ export default function ProfileScreen() {
       formData.append("birthDate", birthDate);
       formData.append("gender", gender);
 
-      // Attach new image if local
       if (image && image.startsWith("file://")) {
         const fileName = image.split("/").pop();
         formData.append("picture", {
@@ -155,17 +156,6 @@ export default function ProfileScreen() {
           name: fileName,
         });
       }
-
-      // Log all data being saved
-      console.log("Data to save:", {
-        email,
-        firstName,
-        lastName,
-        phone,
-        birthDate,
-        gender,
-        picture: image,
-      });
 
       const res = await fetch("https://theao.vercel.app/api/saveprofile", {
         method: "POST",
@@ -176,12 +166,9 @@ export default function ProfileScreen() {
       });
 
       const json = await res.json();
-      console.log("Response from API:", json);
 
       if (json.success) {
         Alert.alert("Profil", "Modifications enregistrées!");
-
-        // Safely set image if backend returned a URL
         if (json.data && json.data.pictures) {
           setImage(json.data.pictures);
         }
@@ -389,57 +376,70 @@ export default function ProfileScreen() {
         )}
       </ScrollView>
 
-      <View style={styles.bottomNavWrapper}>
-        <View style={styles.bottomNav}>
-          <TouchableOpacity
-            style={styles.navButton}
-            onPress={() => {
-              setBottomTab("matches");
-              navigation.navigate("Home");
-            }}
-          >
-            <Ionicons
-              name="football-outline"
-              size={24}
-              color={bottomTab === "matches" ? "#FFD700" : "white"}
-            />
-            <Text
-              style={{
-                color: bottomTab === "matches" ? "#FFD700" : "white",
-                fontSize: 12,
-                marginTop: 4,
+      {/* ✅ Safe area only for bottom */}
+      <SafeAreaView
+        style={[
+          styles.safeArea,
+          { backgroundColor: Platform.OS === "ios" ? "#5E2A84" : "white" },
+        ]}
+        edges={["bottom"]}
+      >
+        <StatusBar
+          style={Platform.OS === "android" ? "light" : "auto"}
+        />
+
+        <View style={styles.bottomNavWrapper}>
+          <View style={styles.bottomNav}>
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => {
+                setBottomTab("matches");
+                navigation.navigate("Home");
               }}
             >
-              Matches
-            </Text>
-          </TouchableOpacity>
+              <Ionicons
+                name="football-outline"
+                size={24}
+                color={bottomTab === "matches" ? "#FFD700" : "white"}
+              />
+              <Text
+                style={{
+                  color: bottomTab === "matches" ? "#FFD700" : "white",
+                  fontSize: 10,
+                  marginTop: 1,
+                }}
+              >
+                Matches
+              </Text>
+            </TouchableOpacity>
 
-          <View style={styles.navSeparator} />
+          
 
-          <TouchableOpacity
-            style={styles.navButton}
-            onPress={() => {
-              setBottomTab("profile");
-              navigation.navigate("Profile");
-            }}
-          >
-            <Ionicons
-              name="person-outline"
-              size={24}
-              color={bottomTab === "profile" ? "#FFD700" : "white"}
-            />
-            <Text
-              style={{
-                color: bottomTab === "profile" ? "#FFD700" : "white",
-                fontSize: 12,
-                marginTop: 4,
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => {
+                setBottomTab("profile");
+                navigation.navigate("Profile");
               }}
             >
-              Profil
-            </Text>
-          </TouchableOpacity>
+              <Ionicons
+                name="person-outline"
+                size={24}
+                color={bottomTab === "profile" ? "#FFD700" : "white"}
+              />
+              <Text
+                style={{
+                  color: bottomTab === "profile" ? "#FFD700" : "white",
+                  fontSize: 10,
+                  marginTop: 1,
+                }}
+              >
+                Profil
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
@@ -542,22 +542,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  safeArea: {
+    flexShrink: 0,
+  },
   bottomNavWrapper: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     alignItems: "center",
   },
   bottomNav: {
-    height: 55,
+    height: 40,
     backgroundColor: "#5E2A84",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     paddingHorizontal: 10,
-    
   },
-  navButton: { flex: 1, justifyContent: "center", alignItems: "center" },
+  navButton: { flex: 1, justifyContent: "center", alignItems: "center",marginTop:15 },
   navSeparator: { width: 1, height: "60%", backgroundColor: "#bbb" },
 });

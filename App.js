@@ -5,7 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { ClerkProvider, useAuth, useUser } from "@clerk/clerk-expo";
 import * as SecureStore from "expo-secure-store";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 
 import OpenScreen from "./app/openscreen";
@@ -72,19 +72,19 @@ function RootNavigator() {
 
   // Loading splash screen
   if (!isLoaded || loading) {
-  return (
-    <LinearGradient
-      colors={["#4B0082", "#5E2A84"]}
-      style={styles.splashContainer}
-    >
-      <Image
-        source={require("./assets/logoa.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
-    </LinearGradient>
-  );
-}
+    return (
+      <LinearGradient
+        colors={["#4B0082", "#5E2A84"]}
+        style={styles.splashContainer}
+      >
+        <Image
+          source={require("./assets/logoa.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </LinearGradient>
+    );
+  }
 
   return (
     <Stack.Navigator
@@ -117,16 +117,10 @@ export default function App() {
     <ClerkProvider publishableKey={clerkKey} tokenCache={tokenCache}>
       <SafeAreaProvider>
         <NavigationContainer>
-          <SafeAreaView
-            style={[
-              styles.safeArea,
-              { backgroundColor: Platform.OS === "ios" ? "#5E2A84" : "white" }, // ✅ iOS purple, Android white
-            ]}
-            edges={["bottom"]}
-          >
+          <View style={styles.safeArea}>
             <StatusBar style={Platform.OS === "android" ? "light" : "auto"} />
             <RootNavigator />
-          </SafeAreaView>
+          </View>
         </NavigationContainer>
       </SafeAreaProvider>
     </ClerkProvider>
@@ -136,12 +130,13 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: Platform.OS === "ios" ? "#5E2A84" : "white", // ✅ iOS purple, Android white
   },
   splashContainer: {
-  flex: 1,
-  justifyContent: "center",
-  alignItems: "center",
-},
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   logo: {
     width: 250,
     height: 250,

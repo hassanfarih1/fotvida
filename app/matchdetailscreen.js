@@ -321,7 +321,7 @@ export default function MatchDetailScreen({ route }) {
         </View>
 
         {/* Players */}
-        <View style={{ marginHorizontal: scale(20), marginBottom: verticalScale(10), marginTop: verticalScale(10) }}>
+        <View style={{ marginHorizontal: scale(20), marginBottom: verticalScale(10), marginTop: verticalScale(5) }}>
           <Text style={styles.detailLabel}>Joueurs :</Text>
           {loading ? (
             <View style={{ flexDirection: "row" }}>
@@ -343,7 +343,7 @@ export default function MatchDetailScreen({ route }) {
 
         {/* Description */}
         {match.description && (
-          <View style={{ marginTop: verticalScale(20), paddingHorizontal: scale(20) }}>
+          <View style={{ marginTop: verticalScale(5), paddingHorizontal: scale(20) }}>
             <Text style={styles.detailLabel}>Description :</Text>
             <Text style={styles.detailsText}>
               {readMore || match.description.length <= DESCRIPTION_LIMIT

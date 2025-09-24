@@ -12,12 +12,14 @@ import {
   RefreshControl,
   Alert,
   Platform,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import LottieView from "lottie-react-native";
 import { useUser } from "@clerk/clerk-expo";
 import * as Location from "expo-location";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -115,7 +117,12 @@ export default function HomeScreen() {
       <View style={{ height: 150, backgroundColor: "#7A4EB0" }} />
       <View style={{ padding: 15 }}>
         <View
-          style={{ height: 20, backgroundColor: "#7A4EB0", marginBottom: 10, borderRadius: 4 }}
+          style={{
+            height: 20,
+            backgroundColor: "#7A4EB0",
+            marginBottom: 10,
+            borderRadius: 4,
+          }}
         />
         <View
           style={{
@@ -208,58 +215,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.bottomNavWrapper}>
-        <View style={styles.bottomNav}>
-          <TouchableOpacity
-            style={styles.navButton}
-            onPress={() => {
-              setBottomTab("matches");
-              navigation.navigate("Home");
-            }}
-          >
-            <Ionicons
-              name="football-outline"
-              size={24}
-              color={bottomTab === "matches" ? "#FFD700" : "white"}
-            />
-            <Text
-              style={{
-                color: bottomTab === "matches" ? "#FFD700" : "white",
-                fontSize: isAndroid ? 10 : 12,
-                marginTop: 4,
-              }}
-            >
-              Matches
-            </Text>
-          </TouchableOpacity>
-
-          <View style={styles.navSeparator} />
-
-          <TouchableOpacity
-            style={styles.navButton}
-            onPress={() => {
-              setBottomTab("profile");
-              navigation.navigate("Profile");
-            }}
-          >
-            <Ionicons
-              name="person-outline"
-              size={24}
-              color={bottomTab === "profile" ? "#FFD700" : "white"}
-            />
-            <Text
-              style={{
-                color: bottomTab === "profile" ? "#FFD700" : "white",
-                fontSize: isAndroid ? 10 : 12,
-                marginTop: 4,
-              }}
-            >
-              Profile
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 140 }}
@@ -363,9 +318,7 @@ export default function HomeScreen() {
             style={styles.createButton}
             onPress={() => navigation.navigate("CreerMatch")}
           >
-            <Text style={[styles.createText, isAndroid && { fontSize: 9 }]}>
-              Créer un match
-            </Text>
+            <Text style={[styles.createText, isAndroid && { fontSize: 9 }]}>Créer un match</Text>
           </TouchableOpacity>
         </View>
 
@@ -417,15 +370,9 @@ export default function HomeScreen() {
                         : { backgroundColor: "green" },
                     ]}
                   >
-                    {isFull ? (
-                      <Text style={[styles.remainingPlacesText, isAndroid && { fontSize: 10 }]}>
-                        Match complet
-                      </Text>
-                    ) : (
-                      <Text style={[styles.remainingPlacesText, isAndroid && { fontSize: 10 }]}>
-                        {remainingPlaces} place{remainingPlaces > 1 ? "s" : ""} restante
-                      </Text>
-                    )}
+                    <Text style={[styles.remainingPlacesText, isAndroid && { fontSize: 10 }]}>
+                      {isFull ? "Match complet" : `${remainingPlaces} place${remainingPlaces > 1 ? "s" : ""} restante`}
+                    </Text>
                   </View>
                 </View>
 
@@ -459,6 +406,70 @@ export default function HomeScreen() {
           })
         )}
       </ScrollView>
+
+      {/* Bottom Nav wrapped in SafeAreaView with platform-specific background */}
+      <SafeAreaView
+        style={{
+          backgroundColor: Platform.OS === "ios" ? "#5E2A84" : "white",
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+        }}
+        edges={["bottom"]}
+      >
+        <StatusBar
+          barStyle={Platform.OS === "android" ? "light-content" : "default"}
+        />
+        <View style={styles.bottomNav}>
+          <TouchableOpacity
+            style={styles.navButton}
+            onPress={() => {
+              setBottomTab("matches");
+              navigation.navigate("Home");
+            }}
+          >
+            <Ionicons
+              name="football-outline"
+              size={24}
+              color={bottomTab === "matches" ? "#FFD700" : "white"}
+            />
+            <Text
+              style={{
+                color: bottomTab === "matches" ? "#FFD700" : "white",
+                fontSize: Platform.OS === "android" ? 10 : 10,
+                marginTop: 1,
+              }}
+            >
+              Matches
+            </Text>
+          </TouchableOpacity>
+
+          
+
+          <TouchableOpacity
+            style={styles.navButton}
+            onPress={() => {
+              setBottomTab("profile");
+              navigation.navigate("Profile");
+            }}
+          >
+            <Ionicons
+              name="person-outline"
+              size={24}
+              color={bottomTab === "profile" ? "#FFD700" : "white"}
+            />
+            <Text
+              style={{
+                color: bottomTab === "profile" ? "#FFD700" : "white",
+                fontSize: Platform.OS === "android" ? 10 : 10,
+                marginTop: 1,             }}
+            >
+              Profile
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     </View>
   );
 }
@@ -482,27 +493,25 @@ const styles = StyleSheet.create({
   input: { flex: 1, color: "white" },
   createButton: { backgroundColor: "#FFD700", borderRadius: 10, paddingVertical: 13, paddingHorizontal: 15 },
   createText: { fontWeight: "bold", color: "#4B0082" },
-  card: { backgroundColor: "#5E2A84", borderRadius: 12, marginBottom: 40, overflow: "hidden", borderWidth: 1, borderColor: "#C8A2C8" },
-  imageBackgroundWrapper: { position: "relative", width: "100%", height: 150 },
-  backgroundImage: { width: "100%", height: 150, justifyContent: "flex-end" },
-  profilePicOverlay: { position: "absolute", bottom: -35, left: 15, width: 80, height: 80, borderRadius: 40, borderWidth: 2, borderColor: "#FFD700" },
-  remainingPlacesBadge: { position: "absolute", top: 158, right: 7, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
-  remainingPlacesText: { color: "white", fontWeight: "bold", fontSize: 12 },
-  cardContent: { padding: 15, marginTop: 30 },
-  localisationText: { color: "#ccc", fontSize: 12, fontWeight: "300", marginBottom: 4 },
-  matchName: { color: "white", fontSize: 20, fontWeight: "bold", marginTop: 0 , marginBottom:20 },
-  matchTime: { color: "#FFD700", fontSize: 14, fontWeight: "400", marginTop: 7 },
-  detailLabel: { color: "#FFD700", fontSize: 14, fontWeight: "600", marginBottom: 5 },
-  separator: { height: 1, backgroundColor: "#C8A2C8", marginVertical: 10, width: "150%", marginLeft: "-70" },
+  card: { backgroundColor: "#5E2A84", borderRadius: 12, marginBottom: 20, overflow: "hidden" },
+  imageBackgroundWrapper: { position: "relative", height: 150 },
+  backgroundImage: { width: "100%", height: "100%" },
+  profilePicOverlay: { width: 50, height: 50, borderRadius: 25, position: "absolute", bottom: 10, left: 10, borderWidth: 2, borderColor: "white" },
+  remainingPlacesBadge: { position: "absolute", top: 10, right: 10, borderRadius: 12, paddingVertical: 4, paddingHorizontal: 8 },
+  remainingPlacesText: { color: "white", fontWeight: "bold" },
+  cardContent: { padding: 15 },
+  localisationText: { color: "#ccc", fontSize: 14 },
+  matchName: { fontSize: 22, fontWeight: "bold", color: "white", marginVertical: 5 },
+  separator: { height: 1, backgroundColor: "#7A4EB0", marginVertical: 10 },
+  detailLabel: { fontSize: 16, color: "#FFD700", fontWeight: "bold", marginBottom: 5 },
   detailsRow: { flexDirection: "row", justifyContent: "space-between" },
   detailsText: { color: "white", fontSize: 16 },
-  priceText: { color: "white", fontSize: 16 },
-  joinButton: { backgroundColor: "#FFD700", borderRadius: 8, paddingVertical: 10, alignItems: "center", marginTop:8 },
+  priceText: { color: "#FFD700", fontSize: 16, fontWeight: "bold" },
+  joinButton: { backgroundColor: "#FFD700", borderRadius: 10, paddingVertical: 10, alignItems: "center", marginTop: 10 },
   joinButtonText: { color: "#4B0082", fontWeight: "bold", fontSize: 16 },
-  bottomNavWrapper: { position: "absolute", bottom: 0, left: 0, right: 0, alignItems: "center" },
-  bottomNav: { height: 55, zIndex: 10, backgroundColor: "#5E2A84", flexDirection: "row", justifyContent: "space-around", alignItems: "center", paddingHorizontal: 10 },
-  navButton: { flex: 1, justifyContent: "center", alignItems: "center" },
-  navSeparator: { width: 1, height: "60%", backgroundColor: "#bbb" },
-  noMatchContainer: { justifyContent: "center", alignItems: "center", marginTop: 50 },
-  noMatchText: { color: "white", fontSize: 16, fontWeight: "bold", marginTop: 15, textAlign: "center", opacity:0.3 },
+  bottomNav: { flexDirection: "row", justifyContent: "space-around",height: 40 },
+  navButton: { alignItems: "center",marginTop:7 },
+  navSeparator: { width: 1, backgroundColor: "#fff" },
+  noMatchContainer: { alignItems: "center", marginTop: 40 },
+  noMatchText: { color: "white", fontSize: 16, marginTop: 10 },
 });
